@@ -17,6 +17,16 @@ The objective of this hackathon project is to create a pipeline that converts th
 To do this, we’ll need people with experience in large-ish data processing in python, someone interested in building a small frontend on top (optional).
 
 
+## Data
+
+The download links for the data are here:
+https://bulkdata.uspto.gov/
+
+There are many formats, some with images, which are giant. We will ignore these and use the data links under the heading:
+
+*Patent Grant Full Text Data (No Images) (JAN 1976 - PRESENT)*
+Contains the concatenated full text of each patent grant document issued weekly (Tuesdays) from January 1, 1976 to present (excludes images/drawings). Subset of the Patent Grant Full Text Data with Embedded TIFF Images. Note: The concatenated file in its entirety is not a valid XML document; it must be un-concatenated back to individual XML documents for XML data processing.
+
 ## Rough Plan
 
 - Download the Full Text XML documents from the Patent Office (quite large)

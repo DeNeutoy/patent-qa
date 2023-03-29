@@ -1,3 +1,5 @@
 chromadb
 langchain
 sqlite-utils
+xmltodict
+typer
