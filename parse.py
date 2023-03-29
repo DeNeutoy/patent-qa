@@ -6,6 +6,26 @@ from pathlib import Path
 app = typer.Typer(no_args_is_help=True)
 
 
+def extract_text(json_data):
+    text_list = []
+    if isinstance(json_data, dict):
+
+        text = json_data.get("#text", None)
+        if text is not None:
+            text_list.append(text)
+        claim_text = json_data.get("claim-text")
+        if claim_text is not None:
+            text_list.extend(extract_text(claim_text))
+    elif isinstance(json_data, list):
+        for item in json_data:
+            if isinstance(item, str):
+                text_list.append(item)
+            else:
+                text_list.extend(extract_text(item))
+    return text_list
+
+
+
 @app.command()
 def main(input_path: Path, output_path: Path):
     # Open the input file with concatenated XML data
@@ -36,11 +56,20 @@ def main(input_path: Path, output_path: Path):
                 if p.get("#text") is not None:
                     description.append(p.get("#text"))
 
+            claims = []
+            for p in doc_dict['us-patent-grant']['claims']['claim']:
+                claim_parts = extract_text(p)
+
+                claims.append(" ".join(claim_parts))
+            
+            print(claims)
+
             parsed = {
                 "title": title,
                 "metadata": metadata,
                 "abstract": abstract,
-                "description": description
+                "description": description,
+                "claims": claims
 
             }
             # Write the dictionary as a JSON object to the output file
