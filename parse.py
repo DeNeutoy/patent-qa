@@ -24,6 +24,26 @@ def extract_text(json_data):
                 text_list.extend(extract_text(item))
     return text_list
 
+def extract_text_from_abstract(json_data):
+    text_list = []
+    if isinstance(json_data, dict):
+
+        text = json_data.get("#text", None)
+        if text is not None:
+            text_list.append(text)
+
+        for k, v in json_data.items():
+            if k == "#text":
+                continue
+            text_list.extend(extract_text_from_abstract(v))
+    elif isinstance(json_data, list):
+        for item in json_data:
+            if isinstance(item, str):
+                text_list.append(item)
+            else:
+                text_list.extend(extract_text_from_abstract(item))
+    return text_list
+
 
 
 @app.command()
@@ -46,9 +66,20 @@ def main(input_path: Path, output_path: Path):
             # Convert the XML document to a dictionary
             doc_dict = xmltodict.parse(xml_doc)
 
+            if doc_dict.get("us-patent-grant") is None:
+                continue
             metadata = doc_dict['us-patent-grant']['us-bibliographic-data-grant']
             title = metadata['invention-title']['#text']
-            abstract = doc_dict['us-patent-grant']['abstract']['p']['#text']
+
+            has_abstract = doc_dict['us-patent-grant'].get("abstract") is not None
+            if not has_abstract:
+                continue
+            try:
+                abstract = extract_text_from_abstract(doc_dict['us-patent-grant']['abstract'])
+            except:
+                print("Bad abstract:")
+                print(doc_dict['us-patent-grant']['abstract'])
+
 
             description = []
             for p in doc_dict['us-patent-grant']['description']['p']:
@@ -62,7 +93,6 @@ def main(input_path: Path, output_path: Path):
 
                 claims.append(" ".join(claim_parts))
             
-            print(claims)
 
             parsed = {
                 "title": title,
